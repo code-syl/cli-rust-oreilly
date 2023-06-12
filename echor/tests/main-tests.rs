@@ -7,52 +7,55 @@ const FLAGS: [&str; 1] = ["-n"];
 const NEWLINE: &str = "\n";
 const SEPARATOR: &str = " ";
 
+type TestResult = Result <(), Box<dyn std::error::Error>>;
+
 #[test]
-fn exits_with_no_args() {
+fn exits_with_no_args() -> TestResult {
     // Arrange
-    let mut command: Command = Command::cargo_bin(EXECUTABLE).unwrap();
+
+    // Act
+    let mut command: Command = Command::cargo_bin(EXECUTABLE)?;
 
     // Assert
     command.assert()
         .failure()
         .stderr(predicate::str::contains("Usage:"));
+    
+    return Ok(());
 }
 
 #[test]
-fn runs_with_one_text_arg() {
-    // Arrange
-    let mut command: Command = Command::cargo_bin(EXECUTABLE).unwrap();
+fn runs_with_one_text_arg() -> TestResult {
     let expected: String = TEXT_ARGS[0].to_string() + NEWLINE;
-    command.arg(TEXT_ARGS[0]);
-
-    // Assert
-    command.assert()
-        .success()
-        .stdout(expected);
+    
+    return 
+        run(&[TEXT_ARGS[0]], expected);
 }
 
 #[test]
-fn runs_with_multiple_text_args() {
-    // Arrange
-    let mut command: Command = Command::cargo_bin(EXECUTABLE).unwrap();
+fn runs_with_multiple_text_args() -> TestResult {
     let expected: String = TEXT_ARGS.join(SEPARATOR) + NEWLINE;
-    command.args(&TEXT_ARGS);
 
-    // Assert
-    command.assert()
-        .success()
-        .stdout(expected);
+    return 
+        run(&TEXT_ARGS, expected);
 }
 
 #[test]
-fn omits_newline_with_flag() {
-    // Arrange
-    let mut command: Command = Command::cargo_bin(EXECUTABLE).unwrap();
+fn omits_newline_with_flag() -> TestResult{
     let expected: String = TEXT_ARGS.join(SEPARATOR);
-    command.args([FLAGS[0], TEXT_ARGS.join(SEPARATOR).as_str()]);
 
-    // Assert
-    command.assert()
+    return 
+        run(&[&FLAGS[0], &TEXT_ARGS.join(SEPARATOR).as_str()], expected);
+}
+
+/* =================== Helper function =================== */
+
+fn run(args: &[&str], expected_result: String) -> TestResult {
+    Command::cargo_bin(EXECUTABLE)?
+        .args(args)
+        .assert()
         .success()
-        .stdout(expected);
+        .stdout(expected_result);
+
+    return Ok(());
 }
