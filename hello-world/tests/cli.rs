@@ -1,9 +1,23 @@
 use assert_cmd::Command;
 
-const EXECUTABLE_NAME: &str = "hello-world";
+const HELLO_WORLD_EXECUTABLE: &str = "hello-world";
+const TRUE_EXECUTABLE: &str = "true";
+const FALSE_EXECUTABLE: &str = "false";
 
 #[test]
-fn runs () {
-    let mut command: Command = Command::cargo_bin(EXECUTABLE_NAME).unwrap();
+fn runs() {
+    let mut command: Command = Command::cargo_bin(HELLO_WORLD_EXECUTABLE).unwrap();
     command.assert().success();
+}
+
+#[test]
+fn true_ok() {
+    let mut command: Command = Command::cargo_bin(TRUE_EXECUTABLE).unwrap();
+    command.assert().success();
+}
+
+#[test]
+fn false_not_ok() {
+    let mut command: Command = Command::cargo_bin(FALSE_EXECUTABLE).unwrap();
+    command.assert().failure();
 }
