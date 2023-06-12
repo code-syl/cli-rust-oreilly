@@ -1,6 +1,7 @@
 use clap::Parser;
 
-const NEWLINE: char = '\n';
+const NEWLINE: &str = "\n";
+const SEPARATOR: &str = " ";
 
 #[derive(Parser, Default, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -16,10 +17,10 @@ struct Args {
 
 fn main() {
     let args: Args = Args::parse();
-    let mut text: String = args.text.join(" ");
+    let mut text: String = args.text.join(SEPARATOR);
 
     if !args.omit_newline {
-        text.push(NEWLINE);
+        text += NEWLINE;
     }
 
     print!("{}", text);
