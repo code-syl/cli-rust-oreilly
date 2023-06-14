@@ -7,6 +7,7 @@ const FLAGS: [&str; 1] = ["-n"];
 const NEWLINE: &str = "\n";
 const SEPARATOR: &str = " ";
 
+// src https://docs.rs/testresult/latest/testresult/
 type TestResult = Result <(), Box<dyn std::error::Error>>;
 
 #[test]
