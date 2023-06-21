@@ -38,7 +38,11 @@ pub fn run(config: Config) -> MyResult<()> {
                 eprintln!("# Failed to open {}: {}", file, error),
             Ok(_) => { 
                 println!("# Opened {}", file);
-                print_lines(stream.unwrap().lines());
+                print_lines(
+                    stream.unwrap().lines(),
+                    config.number_lines,
+                    config.number_nonblank_lines
+                );
             },
         }
     }
@@ -53,8 +57,24 @@ fn open(file_name: &str) -> MyResult<Box<dyn BufRead>> {
     }
 }
 
-fn print_lines(lines: Lines<Box<dyn BufRead>>) {
+fn print_lines(lines: Lines<Box<dyn BufRead>>,
+               number_lines: bool,
+               number_nonblank_lines: bool) {
+    let mut line_number:i32 = 1;
     for line in lines {
-        println!("{}", line.unwrap());
+        match line {
+            Err(error) => eprintln!("# Failed to read line: {}", error),
+            Ok(line) => {
+                if (!number_lines || line.is_empty()) && 
+                    !number_nonblank_lines {
+                    println!("{}", line);
+                    continue;
+                }
+
+                println!("{}\t{}", line_number, line);
+            },
+        }
+
+        line_number += 1;
     }
 }
