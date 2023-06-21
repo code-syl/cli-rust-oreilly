@@ -1,14 +1,16 @@
 use clap::Parser;
 use std::fs::File;
-use std::io::{self, BufRead, BufReader};
+use std::io::{self, BufRead, BufReader, Lines};
 
 type MyResult<T> = Result<T, Box<dyn std::error::Error>>;
+
+const STDIN: &str = "stdin";
 
 #[derive(Parser, Default, Debug)]
 #[command(author, version, about, long_about = None)]
 pub struct Config {
     /// The files to concat
-    #[arg(default_values = ["-"])]
+    #[arg(default_values = [STDIN])]
     files: Vec<String>,
 
     /// Number the output lines, starting at 1
@@ -33,10 +35,10 @@ pub fn run(config: Config) -> MyResult<()> {
         let stream = open(&file);
         match stream {
             Err(error) => 
-                eprintln!("Failed to open {}: {}", file, error),
+                eprintln!("# Failed to open {}: {}", file, error),
             Ok(_) => { 
-                println!("Opened {}", file);
-                print();
+                println!("# Opened {}", file);
+                print_lines(stream.unwrap().lines());
             },
         }
     }
@@ -46,11 +48,13 @@ pub fn run(config: Config) -> MyResult<()> {
 
 fn open(file_name: &str) -> MyResult<Box<dyn BufRead>> {
     match file_name {
-        "-" => Ok(Box::new(BufReader::new(io::stdin()))),
+        STDIN => Ok(Box::new(BufReader::new(io::stdin()))),
         _ => Ok(Box::new(BufReader::new(File::open(file_name)?))),
     }
 }
 
-fn print() {
-    println!("Hello, world!");
+fn print_lines(lines: Lines<Box<dyn BufRead>>) {
+    for line in lines {
+        println!("{}", line.unwrap());
+    }
 }
